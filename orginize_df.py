@@ -5,7 +5,8 @@ import zipfile
 def proccess_data():
     with zipfile.ZipFile('cas_offinder_output2.zip') as z:
         with z.open('cas_offinder_output2.txt') as f:
-            data_space = pd.read_csv(f, delimiter=r'\s+', header=None)  # Load data into a DataFrame with space as delimiter
+           data_space = pd.read_csv(f, delimiter=r'\s+', header=None, dtype={1: str})
+  # Load data into a DataFrame with space as delimiter
 
     # Create titles for each column in the DataFrame
     data_space.columns = ['target', 'chrom', 'take_down', 'take_down2', 'take_down3', 'chromStart', 'offtarget_sequence', 'strand', 'distance', 'name']
@@ -38,18 +39,32 @@ def proccess_data():
     combined_data = pd.concat([changeseq_real_results, data_space])
 
     # Drop duplicate rows based on specific columns while keeping the first occurrence
-    final_data_df = combined_data.drop_duplicates(subset=['offtarget_sequence', 'name'], keep='first')
+    final_data_df = combined_data.drop_duplicates(subset=['chromStart', 'name', 'chrom'], keep='first')
     only_target_offtarget = final_data_df[['name', 'offtarget_sequence', 'label']]
 
-    # Uncommented code that might be useful for debugging or exploration
-    # final_data_df = combined_data.drop_duplicates(subset=['name', 'chrom', 'chromStart'], keep='first')
-    # print(data_space.head())
-    # print(data_space.shape)
-    # print(changeseq_real_results.shape)
-    # print(changeseq_real_results.head())
-    # print(changeseq_real_results.columns)
+   # Add the index as a column to track original row indices
+    duplicates = combined_data[combined_data.duplicated(subset=['chromStart', 'name', 'chrom'], keep=False)].reset_index()
 
-    # Print the sum of two specific numbers, possibly for verification of counts
+    # Pair duplicates by merging them back with the original DataFrame
+    paired_duplicates = pd.merge(
+        duplicates,
+        duplicates,
+        on=['offtarget_sequence', 'name'],
+        suffixes=('_original', '_duplicate')
+    )
+
+    # Keep only rows where the original indices are not the same to avoid self-pairing
+    paired_duplicates = paired_duplicates[paired_duplicates['index_original'] != paired_duplicates['index_duplicate']]
+
+        # Save paired duplicates to a CSV file
+    paired_duplicates.to_csv('paired_duplicates.csv', index=False)
+
+    print("Paired duplicates have been saved to 'paired_duplicates.csv'.")
+
+
+
+
+    # Print the sum of two origianl dataframes
     print(840741 + 202043)
 
     # Print the shape of the final DataFrame
@@ -65,3 +80,4 @@ def proccess_data():
     print(count)
 
     return final_data_df, only_target_offtarget
+proccess_data()

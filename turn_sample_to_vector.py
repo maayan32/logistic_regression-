@@ -48,12 +48,12 @@ def create_full_feature_vector(sgRNA_seq, off_target_seq, include_mismatch_count
     
     return feature_vector
 
-# Example sequences
-sgRNA_seq = "ACGTACGTACGTACGTACGTACG"  # Example sgRNA sequence (23 nucleotides)
-off_target_seq = "ACGTTCGTACGTACGTTCGTACG"  # Example off-target sequence (23 nucleotides)
+# # Example sequences
+# sgRNA_seq = "ACGTACGTACGTACGTACGTACG"  # Example sgRNA sequence (23 nucleotides)
+# off_target_seq = "ACGTTCGTACGTACGTTCGTACG"  # Example off-target sequence (23 nucleotides)
 
-# Generate the feature vector
-feature_vector = create_full_feature_vector(sgRNA_seq, off_target_seq)
+# # Generate the feature vector
+# feature_vector = create_full_feature_vector(sgRNA_seq, off_target_seq, False)
 
-print("Feature vector size:", len(feature_vector))
-print("Feature vector:", feature_vector)
+# print("Feature vector size:", len(feature_vector))
+# print("Feature vector:", feature_vector)
