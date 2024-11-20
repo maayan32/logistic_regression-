@@ -3,8 +3,8 @@ import zipfile
 
 # Read the CSV file directly from the zip
 def proccess_data():
-    with zipfile.ZipFile('cas_offinder_output2.zip') as z:
-        with z.open('cas_offinder_output2.txt') as f:
+    with zipfile.ZipFile('cas-offinder_output_new.zip') as z:
+        with z.open('cas-offinder_output_new.txt') as f:
            data_space = pd.read_csv(f, delimiter=r'\s+', header=None, dtype={1: str})
   # Load data into a DataFrame with space as delimiter
 
@@ -65,20 +65,24 @@ def proccess_data():
 
 
     # Print the sum of two origianl dataframes
-    print(840741 + 202043)
+    # print(840741 + 202043)
 
     # Print the shape of the final DataFrame
+    print("final data df info:")
     print(final_data_df.shape)
 
     # Print the first few rows of the final DataFrame
     print(final_data_df.head())
+    print("only targrt and off target df info:")
+    print(only_target_offtarget.shape)
+    print(only_target_offtarget.head())
 
     # Count the number of rows in the final DataFrame where the label is 0
-    count = final_data_df[final_data_df['label'] == 0].shape[0]
+    # count = final_data_df[final_data_df['label'] == 0].shape[0]
 
-    # Print the count of rows with label 0
-    print(count)
-    print(202043 + count)
+    # # Print the count of rows with label 0
+    # print(count)
+    # print(202043 + count)
 
     return final_data_df, only_target_offtarget
 proccess_data()

@@ -2,7 +2,7 @@ import numpy as np
 
 # Define nucleotide to index mapping
 nucleotide_map = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
-
+# does not handle N :   
 def create_position_matrix(sgRNA, off_target):
     # Initialize a 4x4 matrix for a single position
     matrix = np.zeros((4, 4), dtype=int)
@@ -19,6 +19,30 @@ def create_position_matrix(sgRNA, off_target):
         matrix[sgRNA_index, off_target_index] = 1
     
     return matrix
+
+# does handle N- treats it as a wildcard: 
+def create_position_matrix(sgRNA, off_target):
+    # Initialize a 4x4 matrix for a single position
+    matrix = np.zeros((4, 4), dtype=int)
+    
+    # If either sgRNA or off_target is 'N', treat it as a match with any nucleotide
+    if sgRNA == 'N' or off_target == 'N':
+        # Set all possible matches for the 'N' position
+        matrix[:, :] = 1
+    else:
+        # Convert nucleotides to their respective indices
+        sgRNA_index = nucleotide_map[sgRNA]
+        off_target_index = nucleotide_map[off_target]
+        
+        if sgRNA_index == off_target_index:
+            # Match: Set the diagonal element to 1
+            matrix[sgRNA_index, off_target_index] = 1
+        else:
+            # Mismatch: Set the off-diagonal element to 1
+            matrix[sgRNA_index, off_target_index] = 1
+    
+    return matrix
+
 
 def create_feature_vector(sgRNA_seq, off_target_seq):
     # Validate that the sequences have 23 positions
