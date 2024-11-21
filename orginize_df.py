@@ -14,15 +14,20 @@ def proccess_data():
     # Delete the unwanted columns that are not needed for analysis
     data_space.drop(columns=['take_down', 'take_down2', 'take_down3'], inplace=True)
 
+    
     # Change the lowercase letters in the offtarget sequence that represent mismatches to uppercase
     data_space['offtarget_sequence'] = data_space['offtarget_sequence'].str.upper()
+    # remove rows where 'offtarget_sequence' column  contains 'n' 
+    data_space = data_space[~data_space['offtarget_sequence'].str.contains('N', na=False)]
+    df = data_space['offtarget_sequence']
 
     # Initialize the label column with value 0 for the first DataFrame
     data_space['label'] = 0
 
     # Read the real results from an Excel file into a DataFrame
-    changeseq_real_results = pd.read_excel('changeseq_final_results.xlsx')
-
+    changeseq_real_results = pd.read_excel('changeseq_final_results.xlsx') 
+    # Remove rows where the 'offtarget_sequence' column contains '-'
+    changeseq_real_results = changeseq_real_results[~changeseq_real_results['offtarget_sequence'].str.contains('-', na=False)]
     # Clean the 'chrom' column by removing 'chr' prefix
     changeseq_real_results['chrom'] = changeseq_real_results['chrom'].str.replace('chr', '', regex=False)
 
@@ -62,7 +67,7 @@ def proccess_data():
 #     print("Paired duplicates have been saved to 'paired_duplicates.csv'.")
 
 
-
+# various test:  
 
     # Print the sum of two origianl dataframes
     # print(840741 + 202043)
