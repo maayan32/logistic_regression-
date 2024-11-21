@@ -3,8 +3,8 @@ import zipfile
 
 # Read the CSV file directly from the zip
 def proccess_data():
-    with zipfile.ZipFile('cas-offinder_output_new.zip') as z:
-        with z.open('cas-offinder_output_new.txt') as f:
+    with zipfile.ZipFile('cas_offinder_output_3.zip') as z:
+        with z.open('cas_offinder_output_3.txt') as f:
            data_space = pd.read_csv(f, delimiter=r'\s+', header=None, dtype={1: str})
   # Load data into a DataFrame with space as delimiter
 
