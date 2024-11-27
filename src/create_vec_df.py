@@ -7,8 +7,8 @@ import os
 # Process data
 final_data_df, only_target_offtarget = orginize_df.proccess_data()
 # For test:
-only_target_offtarget = only_target_offtarget.head(5)
-final_data_df = final_data_df.head(5)
+# only_target_offtarget = only_target_offtarget.head(5)
+# final_data_df = final_data_df.head(5)
 
 # Create vectors and labels DataFrame
 vectors_and_labels = pd.DataFrame(only_target_offtarget.apply(lambda row: ts.create_full_feature_vector(row['target'], row['offtarget_sequence']), axis=1), columns=['Embedding'])
