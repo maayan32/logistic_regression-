@@ -9,17 +9,18 @@ def proccess_data():
   # Load data into a DataFrame with space as delimiter
 
     # Create titles for each column in the DataFrame
-    data_space.columns = ['target', 'chrom', 'take_down', 'take_down2', 'take_down3', 'chromStart', 'offtarget_sequence', 'strand', 'distance', 'name']
+  # (for old file)  data_space.columns = ['target', 'chrom', 'take_down', 'take_down2', 'take_down3', 'chromStart', 'offtarget_sequence', 'strand', 'distance', 'name']
+    data_space.columns = ['target', 'chrom',  'chromStart', 'offtarget_sequence', 'strand', 'distance', 'name']
 
     # Delete the unwanted columns that are not needed for analysis
-    data_space.drop(columns=['take_down', 'take_down2', 'take_down3'], inplace=True)
+   # data_space.drop(columns=['take_down', 'take_down2', 'take_down3'], inplace=True)
 
     
     # Change the lowercase letters in the offtarget sequence that represent mismatches to uppercase
     data_space['offtarget_sequence'] = data_space['offtarget_sequence'].str.upper()
     # remove rows where 'offtarget_sequence' column  contains 'n' 
     data_space = data_space[~data_space['offtarget_sequence'].str.contains('N', na=False)]
-    df = data_space['offtarget_sequence']
+   # df = data_space['offtarget_sequence']
 
     # Initialize the label column with value 0 for the first DataFrame
     data_space['label'] = 0
@@ -31,8 +32,8 @@ def proccess_data():
     ~changeseq_real_results['offtarget_sequence'].str.contains('-', na=False) &
     (changeseq_real_results['offtarget_sequence'].str.len() == 23)
     ]
-    # Clean the 'chrom' column by removing 'chr' prefix
-    changeseq_real_results['chrom'] = changeseq_real_results['chrom'].str.replace('chr', '', regex=False)
+    # Clean the 'chrom' column by removing 'chr' prefix (not needed with new cas-offinder file)
+    #changeseq_real_results['chrom'] = changeseq_real_results['chrom'].str.replace('chr', '', regex=False)
 
     # Set the label column with value 1 for the second DataFrame
     changeseq_real_results['label'] = 1
@@ -72,14 +73,19 @@ def proccess_data():
 
 
 # various test:  
-    #print(changeseq_real_results.shape)
+    # print(changeseq_real_results.shape)
+    # print("data space info:")
+    # print(data_space.shape)
 
-    # Print the sum of two origianl dataframes
+    # # Print the sum of two origianl dataframes
     # print(840741 + 202043)
 
     # Print the shape of the final DataFrame
     # print("final data df info:")
     # print(final_data_df.shape)
+    # print(final_data_df.head())
+    # print('')
+    # print(final_data_df.tail())
 
     # Print the first few rows of the final DataFrame
     # print(final_data_df.head())
@@ -95,4 +101,4 @@ def proccess_data():
     # print(202043 + count)
 
     return final_data_df, only_target_offtarget
-#proccess_data()
+# proccess_data()
