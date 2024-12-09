@@ -214,4 +214,4 @@ targets2 = [
 # for target in targets2:
 #     run_training_LOO_with_target(target, num_model)
 #     num_model += 1
-# run_training_LOO_with_target(test_target, 1)
+run_training_LOO_with_target(test_target, 1)
