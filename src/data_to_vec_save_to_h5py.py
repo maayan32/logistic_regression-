@@ -65,7 +65,7 @@ embeddings_df = pd.DataFrame({
 embeddings_df.to_csv(vectors_and_labels_csv, index=False)
 
 # Zip the CSV and HDF5 files
-zip_path = os.path.join(output_dir, 'data.zip')
+zip_path = os.path.join(output_dir, 'dataOTSforLR.zip')
 with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
     zipf.write(final_data_csv, os.path.basename(final_data_csv))
     zipf.write(vectors_and_labels_csv, os.path.basename(vectors_and_labels_csv))

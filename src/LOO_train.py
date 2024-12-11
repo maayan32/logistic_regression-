@@ -7,13 +7,13 @@ import zipfile
 import pandas as pd
 
 # Unzip the data
-with zipfile.ZipFile("output_data_h5py/data.zip", "r") as zip_ref:
+with zipfile.ZipFile("output_data_h5py/dataOTSforLR.zip", "r") as zip_ref:
     zip_ref.extractall("data")  # Extract to 'data' directory
 
 # File paths
 hdf5_file = "data/data.h5"
-info_file = "data/OTS_T_info.csv"
-vector_file = "data/OTS_T_samples.csv"
+# info_file = "data/OTS_T_info.csv"
+# vector_file = "data/OTS_T_samples.csv"
 
 # Open the HDF5 file and load the embeddings
 with h5py.File(hdf5_file, 'r') as f:
