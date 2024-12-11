@@ -5,29 +5,35 @@ from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_sco
 import joblib
 import zipfile
 import pandas as pd
+import batch_train_LG as bt
 
 # Unzip the data
-with zipfile.ZipFile("output_data_h5py/data.zip", "r") as zip_ref:
+with zipfile.ZipFile("output_data_h5py/dataOTSforLR.zip", "r") as zip_ref:
     zip_ref.extractall("data")  # Extract to 'data' directory
 
 # File paths
 hdf5_file = "data/data.h5"
-info_file = "data/OTS_T_info.csv"
-vector_file = "data/OTS_T_samples.csv"
+#info_file = "data/OTS_T_info.csv"
+#vector_file = "data/OTS_T_samples.csv"
 
-# Open the HDF5 file and load the embeddings
-with h5py.File(hdf5_file, 'r') as f:
-    # Load the dataset (X and y)
-    X = f['X'][:]
-    y = f['y'][:]
-    info = f['info'][:]
+# Open the HDF5 file and load the embeddings using memmap
+def load_data_with_memmap(hdf5_file):
+    with h5py.File(hdf5_file, 'r') as f:
+        # Assuming the dataset shape is known or can be inferred
+        X = np.memmap(f['X'], dtype=np.float32, mode='r')
+        y = np.memmap(f['y'], dtype=np.int32, mode='r')
+        info = np.memmap(f['info'], dtype='S100', mode='r')  # Adjust dtype as needed
+    return X, y, info
+
+# Load the data
+X, y, info = load_data_with_memmap(hdf5_file)
 
 # Convert byte strings in 'info' to normal strings
 info_str = [target.decode('utf-8') for target in info]
 
 # Target name for testing
 test_target = "GTCACCAATCCTGTCCCTAGNGG"
-def run_training_LOO_with_target(test_target, num_model):
+def run_training_LOO_with_target(test_target, num_model, batch_size=1028, epochs=5):
     # Print the unique values in info to debug the issue
     #print(f"Unique targets in info: {np.unique(info_str)}")
 
@@ -50,10 +56,13 @@ def run_training_LOO_with_target(test_target, num_model):
             print(f"Error: No samples found for target {test_target} in the test set.")
         else:
             # Remaining rows for training
+            # print("hello")
             train_indices = np.where(np.array(info_str) != test_target)[0]
-            X_train = X[train_indices]
-            y_train = y[train_indices]
+            # X_train = X[train_indices]
+            # print("done loading indices")
 
+            # y_train = y[train_indices]
+            
             # Efficient check for train/test set correctness
             if test_target in np.array(info_str)[train_indices]:
                 print(f"Error: Train set contains target {test_target}, which should be left out.")
@@ -66,8 +75,7 @@ def run_training_LOO_with_target(test_target, num_model):
 
             # Train logistic regression model
             print("Start training:")
-            model = LogisticRegression(penalty='l2', C=0.5, solver='saga', max_iter=10, class_weight='balanced', verbose=1)
-            model.fit(X_train, y_train)
+            model = bt.batch_training(X, y, train_indices, batch_size, epochs)
             print("Finished training")
 
             # Test the model
@@ -89,9 +97,20 @@ def run_training_LOO_with_target(test_target, num_model):
             else:
                 print(f"Error: Test set is empty, skipping prediction step.")
 
-            # Save the trained model to a file
-            joblib.dump(model, f'models/logistic_regression_model_{num_model}.pkl')
+            # Create metadata
+            metadata = {
+                'epochs': epochs,
+                'batch_size' : batch_size,
+                'target_name': test_target,
+                'auroc': auroc,
+                'aupr': aupr
+            }
 
+            # Save the trained model and metadata to a file
+            joblib.dump({
+                'model': model,
+                'metadata': metadata
+            }, f'models/logistic_regression_model_{num_model}.pkl')
 
 targets1 = [
     "GGGAACCCAGCGAGTGAAGANGG",
