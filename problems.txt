@@ -1,0 +1,19 @@
+1. what do we do with ending of NGG in embedding? - put 1 in the off_target seq -DONE
+2. what do we do with seq from changeseq off targets that have deletion, meaning '-' in thir seq,
+   also problem in embedding - delete lines DONE
+3. what do we with off-target seq from cas-offinder that have 'n' in begining? like: nnnAACCCAGCGAaTGAAatGGG
+   - delete lines DONE
+
+4. practice on ChangeLocaitor XGboost, write our path to the data.
+
+5. check if we should sort the final data before embedding by target name.
+6. there are OTS in changeSeq results that are not 23 nb. 3114 are in lenght of 24 and 48 are #NAME? in the excel -REMOVED
+7. we had troble loading the data sets saved to numpy- took too long : FIXED saved data sets as h5py files
+8. we startes training with LR- saw that we have low evaluations- problem could be because 
+   we only have 1.5 M samples, and ChangeSeq have 3M. DONE
+
+
+ToDO: 
+1. train LOO on training data, 1028 batch and 5 epochs.
+2. train like changeseq- test and train sets: half half
+3. train with balanced data
