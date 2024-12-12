@@ -1,5 +1,5 @@
-import orginize_df
-import turn_sample_to_vector as ts
+import generateTrainData.orginize_df as orginize_df
+import generateTrainData.turn_sample_to_vector as ts
 import pandas as pd
 import zipfile
 import os

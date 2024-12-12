@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from orginize_df import proccess_data
-import turn_sample_to_vector as ts
+from generateTrainData.orginize_df import proccess_data
+import generateTrainData.turn_sample_to_vector as ts
 
 def test_functions():
     print("Starting function tests...\n")

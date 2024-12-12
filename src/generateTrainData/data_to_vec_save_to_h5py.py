@@ -4,8 +4,8 @@ import h5py
 import os
 import zipfile
 import gc
-import turn_sample_to_vector as ts
-import orginize_df
+import generateTrainData.turn_sample_to_vector as ts
+import generateTrainData.orginize_df as orginize_df
 
 # Process data
 final_data_df, only_target_offtarget = orginize_df.proccess_data()
