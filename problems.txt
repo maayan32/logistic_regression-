@@ -11,6 +11,7 @@
 7. we had troble loading the data sets saved to numpy- took too long : FIXED saved data sets as h5py files
 8. we startes training with LR- saw that we have low evaluations- problem could be because 
    we only have 1.5 M samples, and ChangeSeq have 3M. DONE
+9. training is either too slow, or takes up to much RAM
 
 
 ToDO: 

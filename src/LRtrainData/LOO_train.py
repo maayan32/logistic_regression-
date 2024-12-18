@@ -3,56 +3,54 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
 import joblib
-import zipfile
-import pandas as pd
-import LRtrainData.batch_train_LG as bt
-
-# Unzip the data
-# with zipfile.ZipFile("output_data_h5py/dataOTSforLR.zip", "r") as zip_ref:
-#     zip_ref.extractall("data")  # Extract to 'data' directory
+import batch_train_LG as bt
 
 # File paths
 hdf5_file = "data/data.h5"
 
-# Load the data
-# Convert byte strings in 'info' to normal strings
-
 # Target name for testing
-print("finished extracting")
+print("Finished extracting")
 test_target = "GTCACCAATCCTGTCCCTAGNGG"
+
 def run_training_LOO_with_target(test_target, num_model, batch_size=1028, epochs=5):
+    """ 
+    Args:
+        test_target (string): target seq to leave out from train
+        num_model (int): num model out of the 110 models in loo
+        batch_size (int, optional): _description_. Defaults to 1028.
+        epochs (int, optional): _description_. Defaults to 5.
+    """
+    # get info from file, and check wihch indices  have the target to be excluded from train
     with h5py.File(hdf5_file, 'r') as f:
         info_str = np.array(f['info']).astype(str)        
-        #info_str = [target.decode('utf-8') for target in info]
         test_indices = np.where(np.array(info_str) == test_target)[0]
         all_indices = np.arange(len(info_str))
         train_indices = all_indices[~np.isin(all_indices, test_indices)]
         del info_str
-    # Check if the test_target exists in info_str
-    
+
     if len(test_indices) == 0:
         print(f"Error: {test_target} not found in 'info'. Please choose a valid target.")
-            # Train logistic regression model
+        return
+
     print("Start training:")
     model = bt.batch_training(hdf5_file, train_indices, batch_size, epochs)
     print("Finished training")
+    #load the test data
     with h5py.File(hdf5_file, 'r') as f:
         features = f['X']
         labels = f['y']
-        X_test = features[test_indices];
-        y_test = labels[test_indices];
+        X_test = features[test_indices]
+        y_test = labels[test_indices]
 
-            # Test the model
     if X_test.shape[0] > 0:
+        #get evaluations
         predictions = model.predict(X_test)
         accuracy = accuracy_score(y_test, predictions)
 
-                # Calculate AUPR and AUROC
         proba_test = model.predict_proba(X_test)[:, 1]  # Probabilities for positive class
         aupr = average_precision_score(y_test, proba_test)
         auroc = roc_auc_score(y_test, proba_test)
 
-                # Output results
         print(f"Test Guide: {test_target}")
         print(f"Number of Test Samples: {len(y_test)}")
         print(f"Accuracy: {accuracy:.2f}")
@@ -60,21 +58,19 @@ def run_training_LOO_with_target(test_target, num_model, batch_size=1028, epochs
         print(f"AUROC: {auroc:.4f}")
     else:
         print(f"Error: Test set is empty, skipping prediction step.")
-
-            # Create metadata
+    # create obj to save info into model file
     metadata = {
         'epochs': epochs,
-        'batch_size' : batch_size,
+        'batch_size': batch_size,
         'target_name': test_target,
         'auroc': auroc,
         'aupr': aupr
-         }
-
-            # Save the trained model and metadata to a file
+    }
+    #save model to file
     joblib.dump({
         'model': model,
         'metadata': metadata
-        }, f'models/logistic_regression_model_{num_model}.pkl')
+    }, f'models/logistic_regression_model_{num_model}.pkl')
 
 targets1 = [
     "GGGAACCCAGCGAGTGAAGANGG",
@@ -197,4 +193,5 @@ targets2 = [
 # for target in targets2:
 #     run_training_LOO_with_target(target, num_model)
 #     num_model += 1
+# Example usage
 run_training_LOO_with_target(test_target, 1)

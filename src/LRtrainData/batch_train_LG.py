@@ -1,48 +1,76 @@
 import h5py
-from sklearn.metrics import accuracy_score
+import torch
+from torch.utils.data import Dataset, DataLoader
+from sklearn.metrics import accuracy_score, log_loss
 from sklearn.linear_model import SGDClassifier
-from sklearn.utils import shuffle
 import numpy as np
-from sklearn.metrics import log_loss  # Import log_loss to compute the loss
 
-def batch_training(filepath, train_indices, batch_size=512, epochs=5):
-    model = SGDClassifier(
-        loss='log_loss', penalty='l2', alpha=0.5, max_iter=1, warm_start=True
-    )
-    n_samples = len(train_indices)  # Train only on the subset defined by train_indices
+# Custom Dataset class for HDF5 (to be able to open h5py file with dataloader)
+class HDF5Dataset(Dataset):
+    def __init__(self, filepath, indices):
+        self.filepath = filepath
+        self.indices = indices
+        # use a memmap for easy reading from file while training
+        self.file = h5py.File(filepath, 'r')  # Open file
+        self.features = self.file['X']
+        self.labels = self.file['y']
 
-    for epoch in range(epochs):
-        print(f"started epoch: {epoch}")
-        # Shuffle the train indices for each epoch
-        train_indices = shuffle(train_indices)
-        epoch_loss = 0.0
-        epoch_accuracy = 0.0
-        batch_count = 0
+    def __len__(self):
+        return len(self.indices)
+    #gets batch
+    def __getitem__(self, idx):
+        index = self.indices[idx]
+        X = self.features[index]
+        y = self.labels[index]
+        return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.long)
+    #cleanup, close file
+    def __del__(self):
+        if hasattr(self, 'file') and self.file:
+            self.file.close()
 
-        for start in range(0, n_samples, batch_size):
-            end = start + batch_size
-            batch_indices = train_indices[start:end]  # Dynamically slice train_indices
-            batch_indices = np.sort(batch_indices)  # Ensure indices are sorted
-            with h5py.File(filepath, 'r') as f:
-                features = f['X']
-                labels = f['y']
-                X_batch = features[batch_indices]
-                y_batch = labels[batch_indices]
-            model.partial_fit(X_batch, y_batch, classes=[0,1])
-          # Calculate loss and accuracy for this batch
-            y_pred = model.predict(X_batch)
-            batch_loss = log_loss(y_batch, model.predict_proba(X_batch))
-            batch_accuracy = accuracy_score(y_batch, y_pred)
+# Batch training function
+def batch_training(filepath, train_indices, batch_size=1028, epochs=5):
+    # print("Max index:", max(train_indices))
 
-            # Accumulate batch loss and accuracy
-            epoch_loss += batch_loss
-            epoch_accuracy += batch_accuracy
-            batch_count += 1
+    # Initialize the SGDClassifier
+    model = SGDClassifier(loss='log_loss', penalty='l2', alpha=0.5, max_iter=1, warm_start=True)
 
-        # Calculate average loss and accuracy for the entire epoch
-        avg_epoch_loss = epoch_loss / batch_count
-        avg_epoch_accuracy = epoch_accuracy / batch_count
+    # Create DataLoader for training
+    dataset = HDF5Dataset(filepath, train_indices)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-        # Log average loss and accuracy for the epoch
-        print(f"Epoch {epoch+1}/{epochs}: Loss = {avg_epoch_loss:.4f}, Accuracy = {avg_epoch_accuracy:.4f}")
+    try:
+        for epoch in range(epochs):
+            print(f"Started epoch: {epoch + 1}")
+            epoch_loss = 0.0
+            epoch_accuracy = 0.0
+            batch_count = 0
+
+            for X_batch, y_batch in dataloader:
+                # Convert tensors to numpy arrays
+                # print(f"batch number {batch_count}")
+                X_batch = X_batch.numpy()
+                y_batch = y_batch.numpy()
+
+                # Train model on current batch
+                model.partial_fit(X_batch, y_batch, classes=[0,1])
+
+                # Calculate loss and accuracy for this batch
+                y_pred = model.predict(X_batch)
+                batch_loss = log_loss(y_batch, model.predict_proba(X_batch))
+                batch_accuracy = accuracy_score(y_batch, y_pred)
+
+                # Accumulate loss and accuracy
+                epoch_loss += batch_loss
+                epoch_accuracy += batch_accuracy
+                batch_count += 1
+
+            # Average loss and accuracy for the epoch
+            avg_loss = epoch_loss / batch_count
+            avg_accuracy = epoch_accuracy / batch_count
+            print(f"Epoch {epoch + 1} - Loss: {avg_loss:.4f}, Accuracy: {avg_accuracy:.4f}")
+
+    finally:
+        del dataset  # Ensure resources are cleaned up
+
     return model
