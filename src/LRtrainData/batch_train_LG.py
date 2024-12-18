@@ -4,6 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import accuracy_score, log_loss
 from sklearn.linear_model import SGDClassifier
 import numpy as np
+import time
 
 # Custom Dataset class for HDF5 (to be able to open h5py file with dataloader)
 class HDF5Dataset(Dataset):
@@ -41,6 +42,7 @@ def batch_training(filepath, train_indices, batch_size=1028, epochs=5):
 
     try:
         for epoch in range(epochs):
+            start_time = time.time()  # Start the timer
             print(f"Started epoch: {epoch + 1}")
             epoch_loss = 0.0
             epoch_accuracy = 0.0
@@ -69,6 +71,9 @@ def batch_training(filepath, train_indices, batch_size=1028, epochs=5):
             avg_loss = epoch_loss / batch_count
             avg_accuracy = epoch_accuracy / batch_count
             print(f"Epoch {epoch + 1} - Loss: {avg_loss:.4f}, Accuracy: {avg_accuracy:.4f}")
+            end_time = time.time()  # End the timer
+            epoch_duration = end_time - start_time  # Calculate duration
+            print(f"Epoch completed in {epoch_duration:.2f} seconds.")
 
     finally:
         del dataset  # Ensure resources are cleaned up
