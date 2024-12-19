@@ -1,18 +1,21 @@
 import h5py
 import numpy as np
-from sklearn.linear_model import LogisticRegression
+# from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
 import joblib
-import batch_train_LG as bt
+from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import log_loss
+import batch_train as bt
 
 # File paths
-hdf5_file = "data/data.h5"
+hdf5_file = "data\data.h5"
+hdf5_copy = "data\dataCopy.h5"
 
 # Target name for testing
 print("Finished extracting")
 test_target = "GTCACCAATCCTGTCCCTAGNGG"
 
-def run_training_LOO_with_target(test_target, num_model, batch_size=1028, epochs=5):
+def run_training_LOO_with_target(test_target, num_model, hdf5_file,  batch_size=1028, epochs=5):
     """ 
     Args:
         test_target (string): target seq to leave out from train
@@ -31,9 +34,11 @@ def run_training_LOO_with_target(test_target, num_model, batch_size=1028, epochs
     if len(test_indices) == 0:
         print(f"Error: {test_target} not found in 'info'. Please choose a valid target.")
         return
-
+    # Initialize the SGDClassifier and loss function:
+    model = SGDClassifier(loss='log_loss', penalty='l2', alpha=0.5, max_iter=1, warm_start=True)
+    loss_func = log_loss
     print("Start training:")
-    model = bt.batch_training(hdf5_file, train_indices, batch_size, epochs)
+    model = bt.batch_training(model, loss_func, hdf5_file, train_indices, batch_size, epochs)
     print("Finished training")
     #load the test data
     with h5py.File(hdf5_file, 'r') as f:
@@ -194,4 +199,4 @@ targets2 = [
 #     run_training_LOO_with_target(target, num_model)
 #     num_model += 1
 # Example usage
-run_training_LOO_with_target(test_target, 1)
+run_training_LOO_with_target(test_target, 1, hdf5_file)

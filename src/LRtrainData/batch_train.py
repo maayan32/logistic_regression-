@@ -1,7 +1,7 @@
 import h5py
 import torch
 from torch.utils.data import Dataset, DataLoader
-from sklearn.metrics import accuracy_score, log_loss
+from sklearn.metrics import accuracy_score
 from sklearn.linear_model import SGDClassifier
 import numpy as np
 import time
@@ -30,11 +30,10 @@ class HDF5Dataset(Dataset):
             self.file.close()
 
 # Batch training function
-def batch_training(filepath, train_indices, batch_size=1028, epochs=5):
+def batch_training(model, loss_func, filepath, train_indices, batch_size=1028, epochs=5):
     # print("Max index:", max(train_indices))
 
-    # Initialize the SGDClassifier
-    model = SGDClassifier(loss='log_loss', penalty='l2', alpha=0.5, max_iter=1, warm_start=True)
+    
 
     # Create DataLoader for training
     dataset = HDF5Dataset(filepath, train_indices)
@@ -59,7 +58,7 @@ def batch_training(filepath, train_indices, batch_size=1028, epochs=5):
 
                 # Calculate loss and accuracy for this batch
                 y_pred = model.predict(X_batch)
-                batch_loss = log_loss(y_batch, model.predict_proba(X_batch))
+                batch_loss = loss_func(y_batch, model.predict_proba(X_batch))
                 batch_accuracy = accuracy_score(y_batch, y_pred)
 
                 # Accumulate loss and accuracy
