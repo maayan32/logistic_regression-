@@ -6,6 +6,8 @@ import joblib
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import log_loss
 import batch_train as bt
+import multiprocessing
+
 
 # File paths
 hdf5_file = "data\data.h5"
@@ -200,3 +202,12 @@ targets2 = [
 #     num_model += 1
 # Example usage
 run_training_LOO_with_target(test_target, 1, hdf5_file)
+# # Function to run the training in parallel with a limit of 2 processes at a time
+# def run_parallel_training(targets, num_model, hdf5_file):
+#     with multiprocessing.Pool(processes=2) as pool:  # Only 2 processes at a time
+#         tasks = [(target, num_model + i, hdf5_file) for i, target in enumerate(targets)]
+#         pool.starmap(run_training_LOO_with_target, tasks)  # Run the tasks in parallel
+
+# # Example usage for running the training with two sets of targets in parallel
+# if __name__ == "__main__":
+#     run_parallel_training(targets1, 1, hdf5_file)
