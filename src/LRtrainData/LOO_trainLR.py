@@ -97,7 +97,7 @@ def run_training_LOO_with_target(test_target, num_model, hdf5_file,  batch_size=
 #     run_training_LOO_with_target(target, num_model)
 #     num_model += 1
 # Example usage
-# run_training_LOO_with_target(test_target, 1, hdf5_file)
+run_training_LOO_with_target(test_target, 1, hdf5_file)
 # Function to run the training in parallel with alternating files
 def run_parallel_training(targets, num_model, file, num_process):
     with multiprocessing.Pool(processes=num_process) as pool:  # Only num_process processes at a time
@@ -109,7 +109,11 @@ def run_parallel_training(targets, num_model, file, num_process):
         pool.starmap(run_training_LOO_with_target, tasks)  # Run the tasks in parallel
 
 #  Example usage for running the training with two sets of targets in parallel
-if __name__ == "__main__":
-    first_try = targets1[:4]
-    print(first_try)
-    # run_parallel_training(first_try, 1, hdf5_file, 4)
+# if __name__ == "__main__":
+#     try_targets = [ "GGGAACCCAGCGAGTGAAGANGG",
+#     "GGTGAGGGAGGAGAGATGCCNGG", "GCGCCGAGAAGGAAGTGCTCNGG", "GTCCCCTCCACCCCACAGTGNGG"]
+
+#     run_parallel_training(try_targets, 2, hdf5_file, 1)
+
+#     # first_try = targets1[:4]
+#     # run_parallel_training(first_try, 1, hdf5_file, 1)

@@ -84,6 +84,7 @@ def batch_training(model, loss_func, filepath, train_indices, lock=None, custom_
 
                 # Train model on current batch
                 model.partial_fit(X_batch, y_batch, classes=[0,1])
+                custom_print(f"finshed batch: {batch_count}")
 
                 # Calculate loss and accuracy for this batch
                 y_pred = model.predict(X_batch)

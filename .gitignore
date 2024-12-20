@@ -3,4 +3,6 @@ src/__pycache__/orginize_df.cpython-312.pyc
 src/__pycache__/turn_sample_to_vector.cpython-312.p
 src/LRtrainData/data
 src/LRtrainData/output_data_h5py
+.vscode/
+
 
