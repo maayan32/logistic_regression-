@@ -110,7 +110,6 @@ def run_parallel_training(targets, num_model, file, num_process):
 
 #  Example usage for running the training with two sets of targets in parallel
 if __name__ == "__main__":
-    #  try_targets = [ "GGGAACCCAGCGAGTGAAGANGG",
-    # "GGTGAGGGAGGAGAGATGCCNGG", "GCGCCGAGAAGGAAGTGCTCNGG","GTCCCCTCCACCCCACAGTGNGG"]
-
-     run_parallel_training(targets1, 1, hdf5_file, 4)
+    first_try = targets1[:4]
+    print(first_try)
+    # run_parallel_training(first_try, 1, hdf5_file, 4)
